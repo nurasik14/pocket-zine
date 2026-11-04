@@ -23,7 +23,7 @@ Usage
       line 8 = back-cover note
 Options: --paper a4|letter, --guides full|ticks|none, --by "your name", --date "Nov 2026"
 Needs: Python 3.9+, rsvg-convert (librsvg) for PDF output, Pillow only when you pass --photos,
-pdfunite (poppler) only for the combined ALL_templates.pdf.
+pdfunite (poppler) only for the combined ALL_templates.pdf, Ghostscript (optional) to shrink photo PDFs.
 
 https://github.com/nurasik14/pocket-zine  ·  MIT License
 """
@@ -215,20 +215,21 @@ def st_polaroid(c):
     w, h = c.w, c.h
     if c.page == 8:
         return back_classic(c)
-    fw = w - 2 * M - 4
+    cover = c.page == 1
+    fw = w - 2 * M - (10 if cover else 4)  # cover frame is narrower to leave room for a 2-line title
     fx = (w - fw) / 2
     side = fw - 6
-    fy = M + (10 if c.page == 1 else 6)
-    fh = side + 3 + 20
+    fy = M + (9 if cover else 6)
+    fh = side + 3 + (26 if cover else 20)
     out = [f'<rect x="{fx + 0.6:.2f}" y="{fy + 0.8:.2f}" width="{fw:.2f}" height="{fh:.2f}" fill="#e8e2d8"/>',
            f'<rect x="{fx:.2f}" y="{fy:.2f}" width="{fw:.2f}" height="{fh:.2f}" fill="#ffffff" stroke="{FAINT}" stroke-width="0.25"/>',
            c.photo(fx + 3, fy + 3, side, side)]
     cy = fy + 3 + side + 7
     if c.page == 1:
         out.insert(0, text(w / 2, M + 4, "A POCKET ZINE", 6, ACCENT, SANS, "middle", 700, 0.8))
-        t, _ = para(fx + 4, cy, c.en or "Title of the walk", 12, fw - 8, 1, weight=600)
+        t, th = para(fx + 3.5, cy - 0.5, c.en or "Title of the walk", 10.5, fw - 7, 2, 1.1, weight=600)
         out.append(t)
-        out.append(text(fx + 4, cy + 6.5, c.zh or "副標題", 8.5, INK, CJK))
+        out.append(text(fx + 3.5, cy + th + 1.2, c.zh or "副標題", 8, INK, CJK))
         out.append(text(w / 2, h - M, c.date or "", 6.5, SOFT, SERIF, "middle"))
     else:
         if c.en or c.zh:
@@ -246,11 +247,15 @@ def st_fullbleed(c):
     w, h = c.w, c.h
     out = [c.photo(0, 0, w, h, "full-page photo")]
     if c.page == 1:
-        out.append(f'<rect x="0" y="0" width="{w}" height="{26}" fill="#ffffff" opacity="0.88"/>')
-        t, th = para(M, M + 6, c.en or "Title of the walk", 14, w - 2 * M, 1, weight=600)
-        out.append(t)
-        out.append(text(M, M + 13, c.zh or "副標題", 9, INK, CJK))
-        out.append(text(w - M, M + 18, c.date or "", 6, SOFT, SERIF, "end"))
+        title = wrap(c.en or "Title of the walk", 13, w - 2 * M, 2)
+        step = 13 * PT * 1.1
+        band = M + 6 + step * (len(title) - 1) + 12
+        out.append(f'<rect x="0" y="0" width="{w}" height="{band:.2f}" fill="#ffffff" opacity="0.9"/>')
+        for i, ln in enumerate(title):
+            out.append(text(M, M + 6 + i * step, ln, 13, INK, SERIF, weight=600))
+        zy = M + 6 + step * (len(title) - 1) + 6.5
+        out.append(text(M, zy, c.zh or "副標題", 9, INK, CJK))
+        out.append(text(w - M, zy, c.date or "", 6, SOFT, SERIF, "end"))
         return "".join(out)
     if c.page == 8:
         out.append(f'<rect x="0" y="{h - 34}" width="{w}" height="34" fill="#ffffff" opacity="0.9"/>')
@@ -524,7 +529,22 @@ def write_pdf(svg, out_pdf):
                  "Install librsvg: Fedora `sudo dnf install librsvg2-tools`, Debian/Ubuntu "
                  "`sudo apt install librsvg2-bin`, macOS `brew install librsvg`.")
     subprocess.run(["rsvg-convert", "-f", "pdf", "-o", str(out_pdf), str(svg_path)], check=True)
+    if "<image" in svg and shutil.which("gs"):
+        shrink_pdf(out_pdf)
     return out_pdf
+
+
+def shrink_pdf(pdf):
+    """rsvg-convert stores photos losslessly (~10 MB per zine). Ghostscript re-saves them as
+    300 dpi JPEG (~1-2 MB) and keeps text and fonts as they are. Skipped when gs is missing."""
+    tmp = pdf.with_suffix(".gs.pdf")
+    r = subprocess.run(["gs", "-q", "-dSAFER", "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite",
+                        "-dPDFSETTINGS=/printer", "-dCompatibilityLevel=1.6", f"-sOutputFile={tmp}", str(pdf)],
+                       capture_output=True)
+    if r.returncode == 0 and tmp.exists() and tmp.stat().st_size < pdf.stat().st_size:
+        tmp.replace(pdf)
+    else:
+        tmp.unlink(missing_ok=True)
 
 
 def main():

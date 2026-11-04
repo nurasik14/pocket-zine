@@ -1,9 +1,10 @@
-# Example captions used for the README previews (the photos are generated, the places are real).
-Tai Hang after the rain | 雨後大坑
-Laundry drying on the fourth floor | 四樓晾衫
-A tram bell somewhere behind the market | 電車鈴聲
-Lights coming on above the noodle shop | 華燈初上
-Steps up to Lin Fa Kung | 蓮花宮的石級
-The fire dragon lane, quiet on a Thursday | 安靜的火龍巷
-Dried herbs, sold by the tael | 乾貨藥材
-One afternoon, eight pages. Thanks for walking with me. | 多謝同行
+# Example captions for examples/photos (real photos, see examples/photos/CREDITS.md).
+# line 1 = cover title | subtitle, lines 2-7 = pages 2-7, line 8 = back cover note
+Ding ding: an afternoon on the Island | 叮叮的下午
+Every window a different colour | 每扇窗都不同顏色
+Laundry drying above the street | 晾衫的窗口
+Dried goods, sold by the tael | 乾貨論兩賣
+Incense coils burning slowly | 慢慢燒的盤香
+Neon coming on, Lockhart Road | 駱克道的霓虹
+A back alley after dark | 夜晚的後巷
+The Star Ferry home. Eight pages, one afternoon. | 坐天星小輪回家
