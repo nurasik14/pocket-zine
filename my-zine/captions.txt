@@ -1,0 +1,10 @@
+# 8 lines: "English | 中文". Lines starting with # are ignored.
+# line 1 = cover title | cover subtitle ; lines 2-7 = page captions ; line 8 = back-cover note
+Title of my walk | 標題
+Caption for page 2 | 中文
+Caption for page 3 | 中文
+Caption for page 4 | 中文
+Caption for page 5 |
+Caption for page 6 |
+Caption for page 7 |
+A short note for the back cover. |

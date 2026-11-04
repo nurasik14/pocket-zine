@@ -1,0 +1,26 @@
+# your own zine: photos and builds stay on your computer
+my-zine/photos/*
+!my-zine/photos/.gitkeep
+my-zine/*.pdf
+my-zine/*.svg
+
+# example builds are reproducible (scripts/build_all.sh); keep one sample PDF
+examples/*.pdf
+!examples/polaroid.pdf
+examples/*.svg
+
+# office leftovers
+*.docx
+*.odt
+.~lock.*#
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
